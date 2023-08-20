@@ -11,13 +11,28 @@ from django.shortcuts import redirect
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.generic import ListView, DetailView, View
-
+from django.shortcuts import render, get_object_or_404
+from .models import Item, UserInteraction
+from .recommender import get_collaborative_recommendations
 from .forms import CheckoutForm, CouponForm, RefundForm, PaymentForm
 from .models import Item, OrderItem, Order, Address, Payment, Coupon, Refund, UserProfile
-
+from django.db.models import Count
+from django.utils.decorators import method_decorator
 stripe.api_key = settings.STRIPE_SECRET_KEY
+@login_required
+def product_detail(request, slug):
+    product = get_object_or_404(Item, slug=slug)
+    user = request.user
 
+    # Fetch collaborative filtering recommendations
+    recommendations = get_collaborative_recommendations(user)
 
+    context = {
+        'product': product,
+        'recommendations': recommendations,
+    }
+
+    return render(request, 'product_detail.html', context)
 def create_ref_code():
     return ''.join(random.choices(string.ascii_lowercase + string.digits, k=20))
 
@@ -350,6 +365,17 @@ class HomeView(ListView):
     paginate_by = 10
     template_name = "home.html"
 
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        recommendations = get_collaborative_recommendations(user)
+        context['recommendations'] = recommendations
+        return context
+
 
 class OrderSummaryView(LoginRequiredMixin, View):
     def get(self, *args, **kwargs):
@@ -517,3 +543,21 @@ class RequestRefundView(View):
             except ObjectDoesNotExist:
                 messages.info(self.request, "This order does not exist.")
                 return redirect("core:request-refund")
+# Add this function to your views.py
+def get_collaborative_recommendations(user, num_recommendations=5):
+    # Get the interactions of the user
+    user_interactions = UserInteraction.objects.filter(user=user, interaction_type=1)
+
+    # Get the products that the user has interacted with
+    user_interacted_products = [interaction.product for interaction in user_interactions]
+
+    # Get recommendations based on products that similar users have interacted with
+    similar_users = UserInteraction.objects.filter(product__in=user_interacted_products, interaction_type=1).values('user').annotate(interaction_count=Count('user')).order_by('-interaction_count')
+    
+    recommended_products = []
+    for similar_user in similar_users:
+        similar_user_products = UserInteraction.objects.filter(user=similar_user['user'], interaction_type=1).exclude(product__in=user_interacted_products).values_list('product', flat=True)
+        recommended_products.extend(similar_user_products)
+
+    recommended_products = list(set(recommended_products))[:num_recommendations]
+    return recommended_products

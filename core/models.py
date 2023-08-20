@@ -4,7 +4,7 @@ from django.db import models
 from django.db.models import Sum
 from django.shortcuts import reverse
 from django_countries.fields import CountryField
-
+from django.contrib.auth.models import User
 
 CATEGORY_CHOICES = (
     ('S', 'Shirt'),
@@ -62,7 +62,21 @@ class Item(models.Model):
             'slug': self.slug
         })
 
+class UserInteraction(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Item, on_delete=models.CASCADE)
+    interaction_type = models.IntegerField(choices=((0, 'No Interaction'), (1, 'Interaction')))
+    timestamp = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return "{} - {}".format(self.user.username, self.product.title)
+
+class UserRecommendation(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    recommended_products = models.ManyToManyField(Item)
+
+    def __str__(self):
+        return "Recommendations for {}".format(self.user.username)
 class OrderItem(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              on_delete=models.CASCADE)

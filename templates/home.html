@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+ {% extends "base.html" %}
 
 {% block content %}
   <main>
@@ -99,6 +99,24 @@
         </div>
 
       </section>
+      <div class="row mt-4">
+        <div class="col">
+          <h2>Recommended Products</h2>
+          <div class="row">
+            {% for recommendation in recommendations %}
+              <div class="col-md-3">
+                <div class="card mb-4">
+                  <img src="{{ recommendation.image.url }}" class="card-img-top" alt="{{ recommendation.title }}">
+                  <div class="card-body">
+                    <h5 class="card-title">{{ recommendation.title }}</h5>
+                    <p class="card-text">${{ recommendation.price }}</p>
+                    <a href="{% url 'core:product' slug=recommendation.slug %}" class="btn btn-primary">View Product</a>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
       <!--Section: Products v.3-->
 
       <!--Pagination-->
