@@ -1,4 +1,5 @@
 from .base import *
+from decouple import config
 
 DEBUG = True
 ALLOWED_HOSTS = ['127.0.0.1']
@@ -43,5 +44,8 @@ DATABASES = {
     }
 }
 
-STRIPE_PUBLIC_KEY = config('STRIPE_TEST_PUBLIC_KEY')
-STRIPE_SECRET_KEY = config('STRIPE_TEST_SECRET_KEY')
+# STRIPE_PUBLIC_KEY = config('pk_test_51NhZ1AI9MTeJtH1HNQ1PrdjGuRLKJeajf5dpxTcWdLqC80sMeCOjJXbYk5CPOhJzoE9W4Qy5Eev7L5Yo1WIT9Y6400xAR5jH0m')
+# STRIPE_SECRET_KEY = config('sk_test_51NhZ1AI9MTeJtH1Hk4HwW8824O6D6Pk1R6y7S7s9mluVRDp5Cl4XwMnqB8voKemrmh3CIgWHzIc8PcmoGvvxajYG00IIyiwixU')
+STRIPE_PUBLIC_KEY = config('STRIPE_TEST_PUBLIC_KEY', default='')
+
+STRIPE_SECRET_KEY = config('STRIPE_TEST_SECRET_KEY', default='')
