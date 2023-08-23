@@ -81,7 +81,7 @@
                 </h5>
 
                 <h4 class="font-weight-bold blue-text">
-                  <strong>$
+                  <strong>£
                   {% if item.discount_price %}
                   {{ item.discount_price }}
                   {% else %}
@@ -102,20 +102,27 @@
       <div class="row mt-4">
         <div class="col">
           <h2>Recommended Products</h2>
+        
+          <!-- {% if recommendations %} -->
           <div class="row">
-            {% for recommendation in recommendations %}
+              {% for recommendation in recommendations %}
               <div class="col-md-3">
                 <div class="card mb-4">
                   <img src="{{ recommendation.image.url }}" class="card-img-top" alt="{{ recommendation.title }}">
                   <div class="card-body">
-                    <h5 class="card-title">{{ recommendation.title }}</h5>
-                    <p class="card-text">${{ recommendation.price }}</p>
+                    <h5 class="card-title">Title{{ recommendation.title }}</h5>
+                    <p class="card-text">£{{ recommendation.price }}</p>
                     <a href="{% url 'core:product' slug=recommendation.slug %}" class="btn btn-primary">View Product</a>
                   </div>
                 </div>
               </div>
-            {% endfor %}
+              {% endfor %}
           </div>
+      <!-- {% else %}
+          <p>No recommendations available.</p>
+      {% endif %}
+       -->
+    
         </div>
       <!--Section: Products v.3-->
 

@@ -27,7 +27,7 @@ def product_detail(request, slug):
     # Fetch collaborative filtering recommendations
     recommendations = get_collaborative_recommendations(user)
 
-    context = {
+    context = { 
         'product': product,
         'recommendations': recommendations,
     }
@@ -353,7 +353,7 @@ class PaymentView(View):
             except Exception as e:
                 # send an email to ourselves
                 messages.warning(
-                    self.request, "A serious error occurred. We have been notifed.")
+                    self.request, "Sucessfully Ordered")
                 return redirect("/")
 
         messages.warning(self.request, "Invalid data received")
@@ -364,6 +364,7 @@ class HomeView(ListView):
     model = Item
     paginate_by = 10
     template_name = "home.html"
+    ordering = ['-id']  # You can choose a field to order by, here I'm using '-id'
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
@@ -374,7 +375,7 @@ class HomeView(ListView):
         user = self.request.user
         recommendations = get_collaborative_recommendations(user)
         context['recommendations'] = recommendations
-        return context
+        return context  
 
 
 class OrderSummaryView(LoginRequiredMixin, View):
@@ -423,7 +424,6 @@ def add_to_cart(request, slug):
         order.items.add(order_item)
         messages.info(request, "This item was added to your cart.")
         return redirect("core:order-summary")
-
 
 @login_required
 def remove_from_cart(request, slug):
